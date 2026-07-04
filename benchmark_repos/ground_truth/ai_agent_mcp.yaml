@@ -1,0 +1,7 @@
+expected_findings:
+  - rule_id: agent-no-hardcoded-api-key
+    file: orchestrator.py
+    line: 5
+  - rule_id: agent-unsandboxed-shell
+    file: orchestrator.py
+    line: 17

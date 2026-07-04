@@ -1,0 +1,3 @@
+[project]
+name = "ai-agent-mcp"
+dependencies = ["google-adk>=2.3.0", "mcp>=1.0.0"]

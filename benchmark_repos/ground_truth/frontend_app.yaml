@@ -1,0 +1,7 @@
+expected_findings:
+  - rule_id: no-console-log
+    file: App.tsx
+    line: 5
+  - rule_id: strict-equality
+    file: utils.js
+    line: 3

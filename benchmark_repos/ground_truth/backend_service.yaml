@@ -1,0 +1,13 @@
+expected_findings:
+  - rule_id: no-float-for-money
+    file: billing.py
+    line: 7
+  - rule_id: redis-key-prefix
+    file: billing.py
+    line: 11
+  - rule_id: bare-except
+    file: billing.py
+    line: 27
+  - rule_id: no-direct-db-in-controllers
+    file: controller.py
+    line: 2

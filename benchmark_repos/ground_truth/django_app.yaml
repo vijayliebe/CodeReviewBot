@@ -1,0 +1,10 @@
+expected_findings:
+  - rule_id: py-web-no-debug-true
+    file: myproject/settings.py
+    line: 1
+  - rule_id: py-web-secret-key-leak
+    file: myproject/settings.py
+    line: 2
+  - rule_id: no-print-statements
+    file: myproject/settings.py
+    line: 11

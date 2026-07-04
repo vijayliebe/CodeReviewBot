@@ -1,0 +1,10 @@
+expected_findings:
+  - rule_id: py-web-no-debug-true
+    file: app.py
+    line: 4
+  - rule_id: py-web-secret-key-leak
+    file: app.py
+    line: 5
+  - rule_id: no-print-statements
+    file: app.py
+    line: 18

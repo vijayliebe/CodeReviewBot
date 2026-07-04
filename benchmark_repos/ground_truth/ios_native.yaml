@@ -1,0 +1,7 @@
+expected_findings:
+  - rule_id: mobile-main-thread-block
+    file: LocationService.swift
+    line: 9
+  - rule_id: mobile-hardcoded-api-key
+    file: LocationService.swift
+    line: 15

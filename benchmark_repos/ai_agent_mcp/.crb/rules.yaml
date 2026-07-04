@@ -1,0 +1,59 @@
+# CodeReviewBot Repository Rules Configuration
+# Customize this file to fit your team's unwritten conventions.
+
+project:
+  name: ai_agent_mcp
+  type: ai-agent
+rules:
+- id: no-float-for-money
+  description: Never use float for monetary calculations. Always use Decimal.
+  pattern: float\(
+  files:
+  - '**/payment*.py'
+  - '**/billing*.py'
+  - '**/invoice*.py'
+  - '**/finance*.py'
+  severity: critical
+  suggestion: Use `from decimal import Decimal` instead of float()
+- id: bare-except
+  description: 'Do not use bare except: clauses, always catch explicit Exceptions'
+  pattern: 'except\s*:'
+  files:
+  - '**/*.py'
+  severity: medium
+  suggestion: Use `except Exception as e:` or catch specific error class
+- id: no-print-statements
+  description: Avoid using print() statements in production code. Use a logging framework.
+  pattern: print\(
+  files:
+  - '**/*.py'
+  exclude_files:
+  - '**/tests/**'
+  - '**/test_*.py'
+  severity: medium
+  suggestion: Use logger.info() or logging.info() instead of print()
+- id: agent-no-hardcoded-api-key
+  description: Do not hardcode LLM/API keys in agent source code.
+  pattern: (GOOGLE_API_KEY|OPENAI_API_KEY|ANTHROPIC_API_KEY)\s*=\s*["\'][^"\']+["\']
+  files:
+  - '**/*.py'
+  - '**/*.ts'
+  - '**/*.js'
+  severity: critical
+  suggestion: Load keys from environment variables or a secrets manager.
+- id: agent-inline-mega-prompt
+  description: Avoid large inline system prompts; use template files under prompts/
+    or .agents/.
+  pattern: instruction\s*=\s*"""[\s\S]{500,}"""
+  files:
+  - '**/*.py'
+  severity: medium
+  suggestion: Extract prompts to a dedicated template file.
+- id: agent-unsandboxed-shell
+  description: Shell/subprocess tools must restrict working directory and validate
+    commands.
+  pattern: subprocess\.(run|call|Popen)\([^)]*shell\s*=\s*True
+  files:
+  - '**/*.py'
+  severity: high
+  suggestion: Avoid shell=True; whitelist commands and sandbox paths.

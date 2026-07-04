@@ -1,0 +1,10 @@
+expected_findings:
+  - rule_id: mobile-main-thread-block
+    file: App.tsx
+    line: 5
+  - rule_id: rn-async-storage-secrets
+    file: App.tsx
+    line: 8
+  - rule_id: no-console-log
+    file: App.tsx
+    line: 13

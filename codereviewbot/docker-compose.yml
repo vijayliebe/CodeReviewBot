@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  codereviewbot:
+    build: .
+    volumes:
+      # Mount the workspace directory to review code
+      - /Users/vj-ie/dev/google_capstone:/workspace
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_REPOSITORY=${GITHUB_REPOSITORY}
+    working_dir: /workspace
+    command: ["review", "--pr", "tests/fixtures/sample_pr_diff.patch"]

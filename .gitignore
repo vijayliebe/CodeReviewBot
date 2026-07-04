@@ -1,0 +1,44 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Secrets & local config — never commit real keys
+.env
+.env.local
+*.pem
+*.key
+
+# Generated indexes (rebuilt via `codereviewbot index`)
+**/chroma_db/
+
+# Workspace config — local per user/project (see codereviewbot/examples/workspace/)
+/.crb-workspace/
+codereviewbot/.crb/
+
+# Local-only — not published to GitHub (includes video script, course notes)
+.docs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Coverage / local reports
+htmlcov/
+.coverage
+coverage.xml

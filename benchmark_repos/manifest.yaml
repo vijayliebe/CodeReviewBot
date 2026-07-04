@@ -1,0 +1,68 @@
+version: 1
+# kind: violation (expected findings) | clean (FP control, expected_findings: [])
+repos:
+  - id: backend_service
+    path: backend_service
+    ground_truth: ground_truth/backend_service.yaml
+    kind: violation
+    weight: 1.0
+  - id: backend_service_clean
+    path: backend_service_clean
+    ground_truth: ground_truth/backend_service_clean.yaml
+    kind: clean
+    weight: 1.0
+  - id: frontend_app
+    path: frontend_app
+    ground_truth: ground_truth/frontend_app.yaml
+    kind: violation
+    weight: 1.0
+  - id: database_infra
+    path: database_infra
+    ground_truth: ground_truth/database_infra.yaml
+    kind: violation
+    weight: 1.0
+  - id: django_app
+    path: django_app
+    ground_truth: ground_truth/django_app.yaml
+    kind: violation
+    weight: 1.2
+  - id: flask_app
+    path: flask_app
+    ground_truth: ground_truth/flask_app.yaml
+    kind: violation
+    weight: 1.0
+  - id: zango_app
+    path: zango_app
+    ground_truth: ground_truth/zango_app.yaml
+    kind: violation
+    weight: 1.0
+  - id: react_native_app
+    path: react_native_app
+    ground_truth: ground_truth/react_native_app.yaml
+    kind: violation
+    weight: 1.2
+  - id: flutter_app
+    path: flutter_app
+    ground_truth: ground_truth/flutter_app.yaml
+    kind: violation
+    weight: 1.0
+  - id: ios_native
+    path: ios_native
+    ground_truth: ground_truth/ios_native.yaml
+    kind: violation
+    weight: 1.0
+  - id: android_native
+    path: android_native
+    ground_truth: ground_truth/android_native.yaml
+    kind: violation
+    weight: 1.0
+  - id: ai_agent_repo
+    path: ai_agent_repo
+    ground_truth: ground_truth/ai_agent_repo.yaml
+    kind: violation
+    weight: 1.3
+  - id: ai_agent_mcp
+    path: ai_agent_mcp
+    ground_truth: ground_truth/ai_agent_mcp.yaml
+    kind: violation
+    weight: 1.5

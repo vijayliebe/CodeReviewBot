@@ -1,0 +1,10 @@
+# raw-sql-injection-risk (platform rule) fires on the same lines as no-raw-sql
+# (custom rule). Both are correct but we only count the custom rule to avoid
+# double-counting the same violation.
+tolerated_findings:
+  - rule_id: raw-sql-injection-risk
+    file: queries.py
+    line: 8
+  - rule_id: raw-sql-injection-risk
+    file: queries.py
+    line: 11

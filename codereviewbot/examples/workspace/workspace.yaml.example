@@ -1,0 +1,35 @@
+# Copy to: <workspace-root>/.crb-workspace/workspace.yaml
+# Workspace root = parent directory of codereviewbot/ (not inside codereviewbot/).
+#
+# Setup:
+#   cp codereviewbot/examples/workspace/workspace.yaml.example ../.crb-workspace/workspace.yaml
+#   # edit paths/repos for YOUR product, then:
+#   codereviewbot workspace show
+
+product: my-product
+
+repos:
+  codereviewbot:
+    path: codereviewbot
+    kind: ai-agent
+    consumes: []
+    provides: []
+    contracts: []
+  backend_service:
+    path: benchmark_repos/backend_service
+    kind: backend
+    consumes: []
+    provides:
+      - frontend_app
+    contracts:
+      - from: frontend_app
+        contract: "REST /api/billing"
+  frontend_app:
+    path: benchmark_repos/frontend_app
+    kind: frontend
+    consumes:
+      - backend_service
+    provides: []
+    contracts:
+      - from: backend_service
+        contract: "REST /api/billing"

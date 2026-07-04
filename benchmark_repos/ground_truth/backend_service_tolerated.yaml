@@ -1,0 +1,6 @@
+# request.get("id") on controller.py:5 is a known FP from the broad redis-key-prefix
+# regex; it is not a Redis call. Tolerated so it does not count as a false positive.
+tolerated_findings:
+  - rule_id: redis-key-prefix
+    file: controller.py
+    line: 5

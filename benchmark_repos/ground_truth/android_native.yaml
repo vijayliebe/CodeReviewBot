@@ -1,0 +1,7 @@
+expected_findings:
+  - rule_id: mobile-main-thread-block
+    file: app/src/main/java/com/example/app/MainActivity.kt
+    line: 13
+  - rule_id: mobile-hardcoded-api-key
+    file: app/src/main/java/com/example/app/MainActivity.kt
+    line: 19

@@ -1,0 +1,16 @@
+# CodeReviewBot Repository Rules Configuration
+# Customize this file to fit your team's unwritten conventions.
+
+project:
+  name: backend_service_clean
+  type: monolith
+rules:
+- id: redis-key-naming
+  description: Ensure Redis keys are prefixed correctly.
+  pattern: redis\.(get|set|del)\("(?![\w\-]+:)
+  files:
+  - '**/*.py'
+  - '**/*.js'
+  - '**/*.ts'
+  severity: high
+  suggestion: Prefix keys with service/domain name (e.g. 'user:session_id')

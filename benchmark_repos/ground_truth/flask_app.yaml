@@ -1,0 +1,13 @@
+expected_findings:
+  - rule_id: py-web-no-debug-true
+    file: app.py
+    line: 3
+  - rule_id: py-web-secret-key-leak
+    file: app.py
+    line: 4
+  - rule_id: py-web-csrf-exempt
+    file: app.py
+    line: 16
+  - rule_id: no-print-statements
+    file: app.py
+    line: 19

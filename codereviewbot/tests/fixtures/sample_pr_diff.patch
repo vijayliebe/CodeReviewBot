@@ -1,0 +1,65 @@
+diff --git a/payment_handler.py b/payment_handler.py
+new file mode 100644
+index 0000000..e69de29
+--- /dev/null
++++ b/payment_handler.py
+@@ -0,0 +1,45 @@
++import os
++import psycopg2
++import redis
++import py_fake_cryptography_pkg  # Typo/hallucinated library
++
++# Hardcoded secret key
++API_KEY = "sk_live_51HxF429FjsdkJ8394fsdj2"
++
++def getPaymentDetails(payment_id):  # Style: camelCase in Python
++    """Get payment transaction info."""
++    conn = psycopg2.connect("dbname=test user=postgres")
++    cur = conn.cursor()
++    
++    # SQL Injection risk & raw query
++    cur.execute(f"SELECT * FROM transactions WHERE id = '{payment_id}'")
++    return cur.fetchone()
++
++def process_refund(order_id, amount):
++    # Business rule: never use float for money
++    refund_amount = float(amount)
++    
++    # Redis integration check: Key lacks required service prefix 'payment-'
++    r = redis.Redis(host='localhost', port=6379, db=0)
++    r.set(f"refund:{order_id}", refund_amount)
++    
++    # Database update
++    conn = psycopg2.connect("dbname=test user=postgres")
++    cur = conn.cursor()
++    cur.execute("UPDATE orders SET status = 'refunded' WHERE id = %s", (order_id,))
++    conn.commit()
++
++def calculate_bulk_tax(order_ids):
++    taxes = {}
++    conn = psycopg2.connect("dbname=test user=postgres")
++    cur = conn.cursor()
++    
++    # N+1 query vulnerability: SELECT query inside a loop
++    for oid in order_ids:
++        cur.execute("SELECT amount FROM order_items WHERE order_id = %s", (oid,))
++        items = cur.fetchall()
++        # Perform mock calculation
++        taxes[oid] = sum([item[0] for item in items]) * 0.15
++        
++    return taxes
+diff --git a/views.py b/views.py
+new file mode 100644
+index 0000000..f67c2d9
+--- /dev/null
++++ b/views.py
+@@ -0,0 +1,10 @@
++from payment_handler import getPaymentDetails
++
++# Business rule: All API handlers must have @login_required decorator.
++# Missing here!
++def get_transaction_status(request):
++    payment_id = request.GET.get('id')
++    # Style check: calls camelCase function
++    details = getPaymentDetails(payment_id)
++    return {"status": "success", "data": details}

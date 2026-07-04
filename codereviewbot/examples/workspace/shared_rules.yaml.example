@@ -1,0 +1,30 @@
+# Copy to: <workspace-root>/.crb-workspace/shared_rules.yaml
+#
+# Setup:
+#   cp codereviewbot/examples/workspace/shared_rules.yaml.example ../.crb-workspace/shared_rules.yaml
+#   # edit rules for YOUR product's policies
+
+rules:
+  - id: no-hardcoded-secrets
+    description: Never hardcode API keys, tokens, or passwords in source code.
+    pattern: '(API_KEY|SECRET_KEY|TOKEN|PASSWORD)\s*=\s*[""''][A-Za-z0-9_\-]{16,}[""'']'
+    files:
+      - "**/*.py"
+      - "**/*.js"
+      - "**/*.ts"
+    severity: critical
+    suggestion: Load secrets from environment variables or a secrets manager.
+
+  - id: no-print-in-production
+    description: Avoid print/console.log statements in production code.
+    pattern: "(print|console\\.log)\\("
+    files:
+      - "**/*.py"
+      - "**/*.js"
+      - "**/*.ts"
+    exclude_files:
+      - "**/tests/**"
+      - "**/test_*.py"
+      - "**/*.test.*"
+    severity: medium
+    suggestion: Use a structured logger instead.

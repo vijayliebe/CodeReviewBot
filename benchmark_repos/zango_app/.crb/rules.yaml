@@ -1,0 +1,59 @@
+# CodeReviewBot Repository Rules Configuration
+# Customize this file to fit your team's unwritten conventions.
+
+project:
+  name: zango_app
+  type: monolith
+rules:
+- id: no-float-for-money
+  description: Never use float for monetary calculations. Always use Decimal.
+  pattern: float\(
+  files:
+  - '**/payment*.py'
+  - '**/billing*.py'
+  - '**/invoice*.py'
+  - '**/finance*.py'
+  severity: critical
+  suggestion: Use `from decimal import Decimal` instead of float()
+- id: bare-except
+  description: 'Do not use bare except: clauses, always catch explicit Exceptions'
+  pattern: 'except\s*:'
+  files:
+  - '**/*.py'
+  severity: medium
+  suggestion: Use `except Exception as e:` or catch specific error class
+- id: no-print-statements
+  description: Avoid using print() statements in production code. Use a logging framework.
+  pattern: print\(
+  files:
+  - '**/*.py'
+  exclude_files:
+  - '**/tests/**'
+  - '**/test_*.py'
+  severity: medium
+  suggestion: Use logger.info() or logging.info() instead of print()
+- id: py-web-no-debug-true
+  description: Ensure DEBUG is disabled in production Django/Flask/Zango settings.
+  pattern: DEBUG\s*=\s*(True|1)
+  files:
+  - '**/settings.py'
+  - '**/config.py'
+  - '**/app.py'
+  severity: critical
+  suggestion: Load DEBUG from environment variables, default False in production.
+- id: py-web-secret-key-leak
+  description: Do not hardcode SECRET_KEY in Django/Flask/Zango configs.
+  pattern: SECRET_KEY\s*=\s*['\"][^'\"]{10,}['\"]
+  files:
+  - '**/settings.py'
+  - '**/config.py'
+  - '**/app.py'
+  severity: critical
+  suggestion: Load SECRET_KEY from environment variables.
+- id: py-web-csrf-exempt
+  description: Avoid @csrf_exempt on API views without documented justification.
+  pattern: '@csrf_exempt'
+  files:
+  - '**/*.py'
+  severity: high
+  suggestion: Use CSRF protection or document why exemption is safe.

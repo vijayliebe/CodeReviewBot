@@ -1,0 +1,65 @@
+# CodeReviewBot Repository Rules Configuration
+# Customize this file to fit your team's unwritten conventions.
+
+project:
+  name: flutter_app
+  type: mobile-app
+rules:
+- id: no-console-log
+  description: Do not leave console.log() statements in production files.
+  pattern: console\.log\(
+  files:
+  - '**/*.js'
+  - '**/*.ts'
+  - '**/*.jsx'
+  - '**/*.tsx'
+  exclude_files:
+  - '**/*.test.*'
+  - '**/*.spec.*'
+  - '**/tests/**'
+  severity: medium
+  suggestion: Use a logger utility or remove console.log()
+- id: mobile-main-thread-block
+  description: Never execute blocking network, disk, or heavy computation on the main
+    thread.
+  pattern: (DispatchQueue\.main\.sync|Thread\.sleep|runBlocking|sleep\(\s*\d+)
+  files:
+  - '**/*.swift'
+  - '**/*.kt'
+  - '**/*.dart'
+  - '**/*.ts'
+  - '**/*.tsx'
+  - '**/*.java'
+  severity: critical
+  suggestion: Use background queues, Dispatchers.IO, isolates, or async/await off
+    the UI thread.
+- id: mobile-permissions-check
+  description: Verify runtime permission handling before location/contacts/media access.
+  pattern: (locationManager|requestPermissions|Geolocator|CLLocationManager|checkSelfPermission)
+  files:
+  - '**/*.swift'
+  - '**/*.kt'
+  - '**/*.dart'
+  severity: high
+  suggestion: Check authorizationStatus and handle denied/permanent-denied states.
+- id: mobile-hardcoded-api-key
+  description: Do not hardcode API keys in mobile source; use secure storage or env
+    config.
+  pattern: (api[_-]?key|apiKey|API_KEY)\s*[=:]\s*["\'][A-Za-z0-9_\-]{16,}["\']
+  files:
+  - '**/*.swift'
+  - '**/*.kt'
+  - '**/*.dart'
+  - '**/*.ts'
+  - '**/*.tsx'
+  severity: critical
+  suggestion: Use Keychain, EncryptedSharedPreferences, flutter_dotenv, or react-native-config.
+- id: rn-async-storage-secrets
+  description: Do not store sensitive tokens in AsyncStorage (React Native).
+  pattern: AsyncStorage\.setItem\([^)]*(token|secret|password|apiKey)
+  files:
+  - '**/*.ts'
+  - '**/*.tsx'
+  - '**/*.js'
+  severity: high
+  suggestion: Use react-native-keychain or expo-secure-store for credentials.

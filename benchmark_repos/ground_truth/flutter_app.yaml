@@ -1,0 +1,4 @@
+expected_findings:
+  - rule_id: mobile-main-thread-block
+    file: lib/main.dart
+    line: 5

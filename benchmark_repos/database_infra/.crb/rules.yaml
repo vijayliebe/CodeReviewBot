@@ -1,0 +1,22 @@
+# database_infra/.crb/rules.yaml
+# Custom business and database/infra checks for db services and Terraform configs
+
+project:
+  name: "database-infra"
+  type: "infra"
+
+integration_rules:
+  - id: no-raw-sql
+    description: "Use parameter bindings instead of raw SQL interpolation to prevent injection."
+    pattern: "SELECT.*%.*|\\.execute\\(.*f['\"]"
+    files: ["**/*.py"]
+    severity: "critical"
+    suggestion: "Rewrite query using SQL parameters. Example: cur.execute('SELECT * FROM users WHERE id = %s', (uid,))"
+
+infra_rules:
+  - id: tf-no-hardcoded-region
+    description: "Terraform region must use variables, not hardcoded regions."
+    pattern: 'region\s*=\s*"(us-|eu-|ap-)'
+    files: ["**/*.tf"]
+    severity: "high"
+    suggestion: "Use var.region instead of a hardcoded region string."

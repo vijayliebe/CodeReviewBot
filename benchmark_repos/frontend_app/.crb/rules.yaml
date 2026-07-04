@@ -1,0 +1,22 @@
+# frontend_app/.crb/rules.yaml
+# Custom business and coding rules for the frontend React/TS application
+
+project:
+  name: "frontend-app"
+  type: "micro-frontend"
+
+custom_rules:
+  - id: no-console-log
+    description: "Do not leave console.log() statements in production files. Use an error reporter instead."
+    pattern: "console\\.log\\("
+    files: ["**/*.tsx", "**/*.ts", "**/*.js"]
+    exclude_files: ["**/*.test.*", "**/*.spec.*"]
+    severity: "medium"
+    suggestion: "Remove console.log() or use a dedicated logging utility if debug info is needed."
+
+  - id: strict-equality
+    description: "Always use strict equality === and !== instead of == and != to prevent coercion bugs."
+    pattern: "\\s(==|!=)\\s"
+    files: ["**/*.ts", "**/*.js", "**/*.tsx"]
+    severity: "high"
+    suggestion: "Change == to ===, or != to !=="

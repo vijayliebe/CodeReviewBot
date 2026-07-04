@@ -1,0 +1,7 @@
+expected_findings:
+  - rule_id: no-raw-sql
+    file: queries.py
+    line: 8
+  - rule_id: tf-no-hardcoded-region
+    file: main.tf
+    line: 3
