@@ -24,7 +24,8 @@ cp .env.example .env   # add GOOGLE_API_KEY
 # Profile + index + review a local patch
 codereviewbot init --path ../benchmark_repos/django_app
 codereviewbot index --path ../benchmark_repos/django_app --repo-id django
-codereviewbot review --pr tests/fixtures/sample_pr_diff.patch
+codereviewbot review --pr tests/fixtures/sample_pr_diff.patch --repo ../benchmark_repos/backend_service
+# Free-tier Gemini (~5 req/min): add --sequential if you hit rate limits
 
 # Run benchmark scorecard (no LLM required)
 codereviewbot benchmark

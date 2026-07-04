@@ -1,6 +1,7 @@
 from google.adk.agents.sequential_agent import SequentialAgent
 from google.adk.agents.parallel_agent import ParallelAgent
 from google.adk.agents.llm_agent import Agent
+import os
 
 # Import tools and instructions
 from src.mcp_servers.filesystem_mcp_server import list_directory, read_file
@@ -70,16 +71,25 @@ summary_generator = Agent(
     instruction=SUMMARY_INSTRUCTION
 )
 
-# 2. Combine analysis agents into a parallel block
-analysis_parallel = ParallelAgent(
-    name="analysis_parallel",
-    description="Executes Security, Style, Impact, and Business Rules checks in parallel.",
-    sub_agents=[security_auditor, style_checker, impact_analyzer, business_rules_checker]
-)
+# 2. Combine analysis agents — parallel by default; sequential when CRB_SEQUENTIAL_AGENTS=1
+# (free-tier Gemini is 5 req/min; parallel burst often triggers 429).
+_analysis_agents = [security_auditor, style_checker, impact_analyzer, business_rules_checker]
+if os.environ.get("CRB_SEQUENTIAL_AGENTS") == "1":
+    analysis_block = SequentialAgent(
+        name="analysis_sequential",
+        description="Executes Security, Style, Impact, and Business Rules checks one at a time.",
+        sub_agents=_analysis_agents,
+    )
+else:
+    analysis_block = ParallelAgent(
+        name="analysis_parallel",
+        description="Executes Security, Style, Impact, and Business Rules checks in parallel.",
+        sub_agents=_analysis_agents,
+    )
 
 # 3. Define the root orchestrator agent sequentially
 root_agent = SequentialAgent(
     name="root_agent",
     description="Main orchestrator that profiles the repository, runs concurrent audits, and compiles the final report.",
-    sub_agents=[profiler_agent, analysis_parallel, summary_generator]
+    sub_agents=[profiler_agent, analysis_block, summary_generator]
 )

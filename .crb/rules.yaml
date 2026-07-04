@@ -1,0 +1,178 @@
+# CodeReviewBot Repository Rules Configuration
+# Customize this file to fit your team's unwritten conventions.
+
+project:
+  name: codereviewbot
+  type: mobile-app
+rules:
+- id: no-float-for-money
+  description: Never use float for monetary calculations. Always use Decimal.
+  pattern: float\(
+  files:
+  - '**/payment*.py'
+  - '**/billing*.py'
+  - '**/invoice*.py'
+  - '**/finance*.py'
+  severity: critical
+  suggestion: Use `from decimal import Decimal` instead of float()
+- id: bare-except
+  description: 'Do not use bare except: clauses, always catch explicit Exceptions'
+  pattern: 'except\s*:'
+  files:
+  - '**/*.py'
+  severity: medium
+  suggestion: Use `except Exception as e:` or catch specific error class
+- id: no-print-statements
+  description: Avoid using print() statements in production code. Use a logging framework.
+  pattern: print\(
+  files:
+  - '**/*.py'
+  exclude_files:
+  - '**/tests/**'
+  - '**/test_*.py'
+  severity: medium
+  suggestion: Use logger.info() or logging.info() instead of print()
+- id: py-web-no-debug-true
+  description: Ensure DEBUG is disabled in production Django/Flask/Zango settings.
+  pattern: DEBUG\s*=\s*(True|1)
+  files:
+  - '**/settings.py'
+  - '**/config.py'
+  - '**/app.py'
+  severity: critical
+  suggestion: Load DEBUG from environment variables, default False in production.
+- id: py-web-secret-key-leak
+  description: Do not hardcode SECRET_KEY in Django/Flask/Zango configs.
+  pattern: SECRET_KEY\s*=\s*['\"][^'\"]{10,}['\"]
+  files:
+  - '**/settings.py'
+  - '**/config.py'
+  - '**/app.py'
+  severity: critical
+  suggestion: Load SECRET_KEY from environment variables.
+- id: py-web-csrf-exempt
+  description: Avoid @csrf_exempt on API views without documented justification.
+  pattern: '@csrf_exempt'
+  files:
+  - '**/*.py'
+  severity: high
+  suggestion: Use CSRF protection or document why exemption is safe.
+- id: no-console-log
+  description: Do not leave console.log() statements in production files.
+  pattern: console\.log\(
+  files:
+  - '**/*.js'
+  - '**/*.ts'
+  - '**/*.jsx'
+  - '**/*.tsx'
+  exclude_files:
+  - '**/*.test.*'
+  - '**/*.spec.*'
+  - '**/tests/**'
+  severity: medium
+  suggestion: Use a logger utility or remove console.log()
+- id: mobile-main-thread-block
+  description: Never execute blocking network, disk, or heavy computation on the main
+    thread.
+  pattern: (DispatchQueue\.main\.sync|Thread\.sleep|runBlocking|sleep\(\s*\d+)
+  files:
+  - '**/*.swift'
+  - '**/*.kt'
+  - '**/*.dart'
+  - '**/*.ts'
+  - '**/*.tsx'
+  - '**/*.java'
+  severity: critical
+  suggestion: Use background queues, Dispatchers.IO, isolates, or async/await off
+    the UI thread.
+- id: mobile-permissions-check
+  description: Verify runtime permission handling before location/contacts/media access.
+  pattern: (locationManager|requestPermissions|Geolocator|CLLocationManager|checkSelfPermission)
+  files:
+  - '**/*.swift'
+  - '**/*.kt'
+  - '**/*.dart'
+  severity: high
+  suggestion: Check authorizationStatus and handle denied/permanent-denied states.
+- id: mobile-hardcoded-api-key
+  description: Do not hardcode API keys in mobile source; use secure storage or env
+    config.
+  pattern: (api[_-]?key|apiKey|API_KEY)\s*[=:]\s*["\'][A-Za-z0-9_\-]{16,}["\']
+  files:
+  - '**/*.swift'
+  - '**/*.kt'
+  - '**/*.dart'
+  - '**/*.ts'
+  - '**/*.tsx'
+  severity: critical
+  suggestion: Use Keychain, EncryptedSharedPreferences, flutter_dotenv, or react-native-config.
+- id: rn-async-storage-secrets
+  description: Do not store sensitive tokens in AsyncStorage (React Native).
+  pattern: AsyncStorage\.setItem\([^)]*(token|secret|password|apiKey)
+  files:
+  - '**/*.ts'
+  - '**/*.tsx'
+  - '**/*.js'
+  severity: high
+  suggestion: Use react-native-keychain or expo-secure-store for credentials.
+- id: agent-no-hardcoded-api-key
+  description: Do not hardcode LLM/API keys in agent source code.
+  pattern: (GOOGLE_API_KEY|OPENAI_API_KEY|ANTHROPIC_API_KEY)\s*=\s*["\'][^"\']+["\']
+  files:
+  - '**/*.py'
+  - '**/*.ts'
+  - '**/*.js'
+  severity: critical
+  suggestion: Load keys from environment variables or a secrets manager.
+- id: agent-inline-mega-prompt
+  description: Avoid large inline system prompts; use template files under prompts/
+    or .agents/.
+  pattern: instruction\s*=\s*"""[\s\S]{500,}"""
+  files:
+  - '**/*.py'
+  severity: medium
+  suggestion: Extract prompts to a dedicated template file.
+- id: agent-unsandboxed-shell
+  description: Shell/subprocess tools must restrict working directory and validate
+    commands.
+  pattern: subprocess\.(run|call|Popen)\([^)]*shell\s*=\s*True
+  files:
+  - '**/*.py'
+  severity: high
+  suggestion: Avoid shell=True; whitelist commands and sandbox paths.
+- id: strict-equality
+  description: Prefer === and !== over == and != for comparison.
+  pattern: \s==\s|\s!=\s
+  files:
+  - '**/*.js'
+  - '**/*.ts'
+  - '**/*.jsx'
+  - '**/*.tsx'
+  severity: low
+  suggestion: Use === or !== to prevent unexpected JS coercion issues
+- id: tf-no-hardcoded-region
+  description: Terraform resources must use var.region, not hardcoded values
+  pattern: region\s*=\s*"(us-|eu-|ap-)
+  files:
+  - '**/*.tf'
+  severity: high
+  suggestion: Use var.region instead of hardcoded region
+- id: raw-sql-injection-risk
+  description: SQL queries must use parameter bindings instead of string interpolation.
+  pattern: \.execute\(.*f['\"]|SELECT\s+.*%\s+|raw\s*\(
+  files:
+  - '**/*.py'
+  - '**/*.js'
+  - '**/*.ts'
+  - '**/*.java'
+  severity: critical
+  suggestion: Pass query parameters as tuple or list rather than using f-strings
+- id: redis-key-naming
+  description: Ensure Redis keys are prefixed correctly.
+  pattern: redis\.(get|set|del)\("(?![\w\-]+:)
+  files:
+  - '**/*.py'
+  - '**/*.js'
+  - '**/*.ts'
+  severity: high
+  suggestion: Prefix keys with service/domain name (e.g. 'user:session_id')

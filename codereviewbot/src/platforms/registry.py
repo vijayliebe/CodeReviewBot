@@ -6,6 +6,7 @@ from pathlib import Path
 from src.platforms.base import PlatformAdapter, RepoProfile
 from src.platforms import python_web, mobile, ai_agent, web_frontend, infra
 from src.platforms._shared import INTEGRATION_DB_RULES, INTEGRATION_REDIS_RULES
+from src.utils.paths import read_pyproject_name
 
 ADAPTERS: list[PlatformAdapter] = [
     python_web.ADAPTER,
@@ -143,7 +144,7 @@ def _profile_repo_cached(root: Path) -> RepoProfile:
     )
 
     return RepoProfile(
-        project_name=root.name,
+        project_name=read_pyproject_name(root) or root.name,
         languages=languages,
         frameworks=frameworks,
         platform_adapters=[a.id for a in active],

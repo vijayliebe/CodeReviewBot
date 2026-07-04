@@ -45,7 +45,7 @@ def test_cli_init_on_django_app(runner):
 def test_cli_workspace_show(runner):
     result = runner.invoke(cli, ["workspace", "show"])
     assert result.exit_code == 0
-    assert "google_capstone" in result.output
+    assert "codereviewbot" in result.output
     assert "backend_service" in result.output
     assert "frontend_app" in result.output
 

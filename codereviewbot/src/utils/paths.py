@@ -21,6 +21,26 @@ def get_workspace_root() -> Path:
     return get_project_root().parent
 
 
+def read_pyproject_name(root: Path) -> str | None:
+    """Return [project].name from pyproject.toml when present."""
+    pyproject = root / "pyproject.toml"
+    if not pyproject.is_file():
+        return None
+    try:
+        import tomllib
+
+        data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+        name = data.get("project", {}).get("name")
+        return name if isinstance(name, str) and name.strip() else None
+    except Exception:
+        return None
+
+
+def default_product_name() -> str:
+    """Workspace product label — use package name, not the clone directory name."""
+    return read_pyproject_name(get_project_root()) or "codereviewbot"
+
+
 def workspace_dir(root: Path | None = None) -> Path:
     return (root or get_workspace_root()) / CRB_WORKSPACE_DIR
 

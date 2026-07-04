@@ -152,7 +152,7 @@ Approved rules run in the **local static pre-pass** on every future review — n
 ## 📂 Project Structure
 
 ```
-google_capstone/                       # Workspace root (run workspace commands from here)
+<workspace-root>/                       # Workspace root (run workspace commands from here)
 ├── .crb-workspace/                    # LOCAL ONLY (gitignored) — see examples/workspace/
 │   ├── workspace.yaml                 # Your repo registry (copy from example or workspace init)
 │   ├── shared_rules.yaml              # Your product-wide rules
@@ -243,7 +243,8 @@ Every chunk is tagged with `repo_id` so cross-repo search and reference lookup w
 
 ```bash
 # Local patch file (no GitHub token needed)
-codereviewbot review --pr tests/fixtures/sample_pr_diff.patch
+codereviewbot review --pr tests/fixtures/sample_pr_diff.patch --repo ../benchmark_repos/backend_service
+# Free-tier Gemini (~5 req/min): add --sequential if you hit rate limits
 
 # Local git commit(s) — requires --repo pointing at a git checkout
 codereviewbot review --pr abc1234 --repo ../benchmark_repos/django_app
@@ -302,7 +303,7 @@ Full guide: [`codereviewbot/examples/workspace/README.md`](examples/workspace/RE
 ### One-time setup (from workspace root)
 
 ```bash
-cd google_capstone          # parent of codereviewbot/
+cd <workspace-root>          # parent of codereviewbot/
 
 # Option A — copy templates and edit for YOUR product
 mkdir -p .crb-workspace

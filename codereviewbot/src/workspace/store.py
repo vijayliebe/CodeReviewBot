@@ -32,6 +32,7 @@ from src.utils.paths import (
     shared_rules_path,
     workspace_chroma_path,
     workspace_config_path,
+    default_product_name,
 )
 
 # Re-export path helpers for callers that import from store.
@@ -125,7 +126,7 @@ def register_repo(
     """Add or update a repo in the workspace registry."""
     cfg = load_workspace(root)
     if cfg is None:
-        cfg = WorkspaceConfig(product=Path(root or get_workspace_root()).name, repos={})
+        cfg = WorkspaceConfig(product=default_product_name(), repos={})
     cfg.repos[repo_id] = RepoRecord(id=repo_id, path=repo_path, kind=kind)
     save_workspace(cfg, root)
     return cfg

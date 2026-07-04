@@ -5,7 +5,7 @@ CodeReviewBot is **generic**: each user or team defines their own workspace for 
 ## Where local config lives
 
 ```
-<workspace-root>/                    # e.g. google_capstone/
+<workspace-root>/                    # parent directory of codereviewbot/
 └── .crb-workspace/                # gitignored — your machine only
     ├── workspace.yaml             # repo registry + relationships
     ├── shared_rules.yaml          # product-wide business rules
@@ -22,7 +22,7 @@ Per-repo rules (also local, created by `init`):
 
 ## Quick setup
 
-From the monorepo root (`google_capstone/`):
+From the monorepo root (parent of `codereviewbot/`):
 
 ```bash
 mkdir -p .crb-workspace

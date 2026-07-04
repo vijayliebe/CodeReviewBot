@@ -5,7 +5,7 @@ services:
     build: .
     volumes:
       # Mount the workspace directory to review code
-      - /Users/vj-ie/dev/google_capstone:/workspace
+      - ..:/workspace
     environment:
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - GITHUB_TOKEN=${GITHUB_TOKEN}

@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from src.utils.paths import get_project_root, get_workspace_root, repo_config_dir, repo_rules_path, shared_rules_path, workspace_config_path
+from src.utils.paths import get_project_root, get_workspace_root, repo_config_dir, repo_rules_path, shared_rules_path, workspace_config_path, default_product_name
 from src.platforms.registry import profile_repo, build_review_preamble
 from src.utils.token_budget import (
     compact_diff,
@@ -23,6 +23,51 @@ WORKSPACE_ROOT = get_workspace_root()
 PROJECT_ROOT = get_project_root()
 
 
+def _default_review_repo(pr: str) -> Path:
+    """Pick a sensible repo root when --repo is omitted."""
+    ref = pr.strip()
+    if ref.endswith((".patch", ".diff")):
+        patch_path = Path(ref)
+        if not patch_path.is_absolute():
+            patch_path = (Path.cwd() / patch_path).resolve()
+        if patch_path.is_file():
+            return WORKSPACE_ROOT / "benchmark_repos" / "backend_service"
+    return WORKSPACE_ROOT
+
+
+def _format_adk_failure(stderr: str, stdout_tail: str = "") -> str:
+    """Turn opaque ADK TaskGroup errors into actionable messages."""
+    combined = f"{stdout_tail}\n{stderr}"
+    if "429" in combined or "RESOURCE_EXHAUSTED" in combined or "quota" in combined.lower():
+        return (
+            "Gemini API rate limit hit (free tier: ~5 requests/min for gemini-2.5-flash).\n"
+            "The parallel analysis block sends 4 LLM calls at once after profiling.\n"
+            "Retry in ~60 seconds, or run with --sequential to avoid the burst:\n"
+            "  codereviewbot review --pr <ref> --repo <path> --sequential"
+        )
+    if "503" in combined or "UNAVAILABLE" in combined:
+        return (
+            "Gemini API temporarily unavailable (model overload).\n"
+            "Wait a few seconds and retry, or use --sequential."
+        )
+    if "TaskGroup" in combined or "sub-exception" in combined:
+        return (
+            f"{stderr.strip()}\n\n"
+            "Hint: one parallel sub-agent likely failed (often rate limit). "
+            "Check the log path printed above, or retry with --sequential."
+        )
+    return stderr.strip() or "Unknown ADK failure (no stderr output)."
+
+
+def _adk_log_hint() -> str:
+    import tempfile
+
+    log = Path(tempfile.gettempdir()) / "agents_log" / "agent.latest.log"
+    if log.is_file():
+        return f"ADK log: {log}"
+    return ""
+
+
 @click.group()
 def cli():
     """CodeReviewBot CLI - Multi-agent automated code review and security auditing."""
@@ -33,7 +78,7 @@ def cli():
 @click.option("--path", "repo_path", default=None, help="Repository root to profile (default: workspace root).")
 def init(repo_path):
     """Analyze the repository stack and initialize a default rules configuration."""
-    root = Path(repo_path).resolve() if repo_path else WORKSPACE_ROOT
+    root = Path(repo_path).resolve() if repo_path else PROJECT_ROOT
     click.echo(f"🔍 Profiling repository at {root}...")
 
     profile = profile_repo(root)
@@ -73,7 +118,7 @@ def workspace_init(product):
     """Create a workspace config (.crb-workspace/workspace.yaml) at the workspace root."""
     from src.workspace.store import init_workspace, shared_rules_path
 
-    name = product or WORKSPACE_ROOT.name
+    name = product or default_product_name()
     cfg = init_workspace(name, WORKSPACE_ROOT)
     click.echo(f"✔ Workspace '{cfg.product}' initialized at {workspace_config_path(WORKSPACE_ROOT)}")
 
@@ -331,15 +376,21 @@ def index_audit(repo_path, repo_id, symbols, verbose, strict, as_json):
     required=True,
     help="PR URL, commit SHA/range, or path to a local .patch / .diff file.",
 )
-@click.option("--repo", default=None, help="Repository root for platform profiling (default: workspace root).")
-def review(pr, repo):
+@click.option("--repo", default=None, help="Repository root for platform profiling (default: benchmark backend for .patch files).")
+@click.option(
+    "--sequential",
+    is_flag=True,
+    default=False,
+    help="Run analysis agents one-at-a-time (slower, avoids free-tier Gemini rate limits).",
+)
+def review(pr, repo, sequential):
     """Run the multi-agent code review pipeline on a PR, commit range, or local diff."""
     api_key = os.environ.get("GOOGLE_API_KEY", "")
     if not api_key or api_key == "your_gemini_api_key_here":
         click.echo(click.style("Error: GOOGLE_API_KEY is not set.", fg="red"), err=True)
         sys.exit(1)
 
-    root = Path(repo).resolve() if repo else WORKSPACE_ROOT
+    root = Path(repo).resolve() if repo else _default_review_repo(pr)
 
     # Lazy-at-review index refresh: ensure the target repo AND its upstream
     # related repos are current against their default branch before reviewing.
@@ -427,8 +478,11 @@ def review(pr, repo):
 
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT)
-        env["CRB_WORKSPACE_ROOT"] = str(root)
+        env["CRB_WORKSPACE_ROOT"] = str(WORKSPACE_ROOT)
+        if sequential:
+            env["CRB_SEQUENTIAL_AGENTS"] = "1"
 
+        stdout_chunks: list[str] = []
         process = subprocess.Popen(
             [str(adk_bin), "run", str(PROJECT_ROOT / "src" / "agents"), query],
             stdout=subprocess.PIPE,
@@ -440,12 +494,18 @@ def review(pr, repo):
         for line in process.stdout:
             if "[EXPERIMENTAL]" in line or "FeatureName" in line:
                 continue
+            stdout_chunks.append(line)
             click.echo(line, nl=False)
 
+        stderr = process.stderr.read()
         process.wait()
         if process.returncode != 0:
             click.echo(click.style(f"\nADK failed ({process.returncode}):", fg="red"), err=True)
-            click.echo(process.stderr.read(), err=True)
+            hint = _adk_log_hint()
+            if hint:
+                click.echo(hint, err=True)
+            msg = _format_adk_failure(stderr, "".join(stdout_chunks[-20:]))
+            click.echo(msg, err=True)
             sys.exit(process.returncode)
     except Exception as e:
         click.echo(click.style(f"Error running review: {e}", fg="red"), err=True)
