@@ -21,17 +21,32 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 cp .env.example .env   # add GOOGLE_API_KEY
 
-# Profile + index + review a local patch
-codereviewbot init --path ../benchmark_repos/django_app
-codereviewbot index --path ../benchmark_repos/django_app --repo-id django
+# End-to-end setup (from monorepo root, after pip install -e ".[dev]")
+
+# 1. Workspace — local config (gitignored)
+codereviewbot workspace init --product "my-product"
+codereviewbot workspace register --id backend --path benchmark_repos/backend_service --kind backend
+codereviewbot workspace register --id frontend --path benchmark_repos/frontend_app --kind frontend
+codereviewbot workspace link --consumer frontend --provider backend --contract "REST /api/billing"
+codereviewbot workspace show
+
+# 2. Per-repo rules — already in benchmark_repos/*/.crb/ (golden set)
+#    For your own repo: codereviewbot init --path path/to/your-repo
+
+# 3. Index both registered repos + review (LLM) or benchmark (no LLM)
+codereviewbot index --path ../benchmark_repos/backend_service --repo-id backend_service
+codereviewbot index --path ../benchmark_repos/frontend_app --repo-id frontend_app
 codereviewbot review --pr tests/fixtures/sample_pr_diff.patch --repo ../benchmark_repos/backend_service
 # Free-tier Gemini (~5 req/min): add --sequential if you hit rate limits
 
-# Run benchmark scorecard (no LLM required)
+# Golden-set regression scorecard — local regex rules vs ground truth (no API key, not a PR review)
 codereviewbot benchmark
 
 # Run tests
 PYTHONPATH=. pytest -q
+
+# Full terminal demo (writes sample_review_output.txt + sample_review_report.md at repo root):
+# python ../.docs/kaggle_submission/demo_all_use_cases.py --fresh
 ```
 
 Full documentation: [`codereviewbot/README.md`](codereviewbot/README.md)
@@ -41,7 +56,6 @@ Full documentation: [`codereviewbot/README.md`](codereviewbot/README.md)
 See [`.gitignore`](.gitignore). Local-only (create on your machine):
 
 - `.crb-workspace/` at workspace root — copy from [`codereviewbot/examples/workspace/`](codereviewbot/examples/workspace/)
-- `codereviewbot/.crb/` — run `codereviewbot init` per repo
 - `.env`, `.venv/`, `chroma_db/`, `.docs/`
 
-Golden-set rules under `benchmark_repos/*/.crb/` **are** in git (test fixtures).
+Per-repo rules live under `benchmark_repos/*/.crb/` (golden-set fixtures, in git). Do **not** run `init` on the workspace root or `codereviewbot/` package — use `--path ../benchmark_repos/<repo>`.

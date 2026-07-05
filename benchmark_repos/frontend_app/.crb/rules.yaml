@@ -1,22 +1,38 @@
-# frontend_app/.crb/rules.yaml
-# Custom business and coding rules for the frontend React/TS application
+# CodeReviewBot Repository Rules Configuration
+# Customize this file to fit your team's unwritten conventions.
 
 project:
-  name: "frontend-app"
-  type: "micro-frontend"
-
-custom_rules:
-  - id: no-console-log
-    description: "Do not leave console.log() statements in production files. Use an error reporter instead."
-    pattern: "console\\.log\\("
-    files: ["**/*.tsx", "**/*.ts", "**/*.js"]
-    exclude_files: ["**/*.test.*", "**/*.spec.*"]
-    severity: "medium"
-    suggestion: "Remove console.log() or use a dedicated logging utility if debug info is needed."
-
-  - id: strict-equality
-    description: "Always use strict equality === and !== instead of == and != to prevent coercion bugs."
-    pattern: "\\s(==|!=)\\s"
-    files: ["**/*.ts", "**/*.js", "**/*.tsx"]
-    severity: "high"
-    suggestion: "Change == to ===, or != to !=="
+  name: frontend_app
+  type: monolith
+rules:
+- id: no-float-for-money
+  description: Never use float for monetary calculations. Always use Decimal.
+  pattern: float\(
+  files:
+  - '**/payment*.py'
+  - '**/billing*.py'
+  - '**/invoice*.py'
+  - '**/finance*.py'
+  severity: critical
+  suggestion: Use `from decimal import Decimal` instead of float()
+- id: bare-except
+  description: 'Do not use bare except: clauses, always catch explicit Exceptions'
+  pattern: 'except\s*:'
+  files:
+  - '**/*.py'
+  severity: medium
+  suggestion: Use `except Exception as e:` or catch specific error class
+- id: no-console-log
+  description: Do not leave console.log() statements in production files.
+  pattern: console\.log\(
+  files:
+  - '**/*.js'
+  - '**/*.ts'
+  - '**/*.jsx'
+  - '**/*.tsx'
+  exclude_files:
+  - '**/*.test.*'
+  - '**/*.spec.*'
+  - '**/tests/**'
+  severity: medium
+  suggestion: Use a logger utility or remove console.log()

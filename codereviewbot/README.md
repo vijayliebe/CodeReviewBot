@@ -224,8 +224,8 @@ The `codereviewbot` CLI exposes five commands.
 ### `init` — Profile a repo and generate starter rules
 
 ```bash
-codereviewbot init                            # profiles the workspace root
 codereviewbot init --path ../benchmark_repos/django_app
+codereviewbot init --path ../benchmark_repos/backend_service
 ```
 
 Outputs a `RepoProfile` (languages, frameworks, platform adapters, integrations) and writes a starter `.crb/rules.yaml` containing the rules injected by the detected adapters.
@@ -394,9 +394,9 @@ platform adapter rules   (lowest — auto-injected from REPO_PROFILE)
 
 ```bash
 # From workspace root — generates rules from detected platform adapters
-codereviewbot init --path codereviewbot
 codereviewbot init --path benchmark_repos/django_app
 codereviewbot init --path benchmark_repos/ai_agent_repo
+codereviewbot init --path benchmark_repos/backend_service
 ```
 
 Each run writes `<repo>/.crb/rules.yaml` with rules from the matching adapters (e.g. `ai_agent` → hardcoded API keys, unsandboxed shell; `python_web` → float-for-money, bare-except).
@@ -408,11 +408,11 @@ codereviewbot harvest-rules --path benchmark_repos/django_app --apply
 codereviewbot approve-rule --id my-custom-rule --pattern '...' --description '...' --path benchmark_repos/django_app
 ```
 
-**This repo's `codereviewbot/.crb/rules.yaml`** was generated via `init` for an **ai-agent + infra** stack and includes rules such as:
+**Example from `benchmark_repos/ai_agent_repo/.crb/rules.yaml`** (generated via `init` for an **ai-agent** stack):
 
 ```yaml
 project:
-  name: codereviewbot
+  name: ai_agent_repo
   type: ai-agent
 
 rules:
@@ -427,7 +427,7 @@ rules:
     severity: high
 ```
 
-Payment/billing rules (`no-float-for-money`, `redis-key-prefix`) belong on **backend repos** — see `benchmark_repos/backend_service/.crb/rules.yaml` — not on the CodeReviewBot agent repo itself.
+Payment/billing rules (`no-float-for-money`, `redis-key-prefix`) belong on **backend repos** — see `benchmark_repos/backend_service/.crb/rules.yaml` — not on agent-only repos.
 
 ### Example starter `rules.yaml` (backend microservice)
 

@@ -38,7 +38,7 @@ def check_custom_rules(file_path: str, content: str) -> str:
             rules.extend(config.get("rules", []))
 
         if not rules:
-            return "No rules found. Run `codereviewbot init` or create .crb-workspace/shared_rules.yaml."
+            return "No rules found. Run `codereviewbot init --path <repo>` or create .crb-workspace/shared_rules.yaml."
 
         # Deduplicate by rule_id (repo overrides shared)
         seen: dict[str, dict] = {}

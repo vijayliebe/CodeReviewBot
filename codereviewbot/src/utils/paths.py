@@ -65,14 +65,22 @@ def repo_rules_path(repo_root: Path) -> Path:
     return repo_config_dir(repo_root) / "rules.yaml"
 
 
+def is_reserved_init_root(path: Path) -> bool:
+    """Paths where `init` must not write .crb (use benchmark_repos/* instead)."""
+    resolved = path.resolve()
+    return resolved in {get_workspace_root().resolve(), get_project_root().resolve()}
+
+
 def find_rules_yaml(start: Path | None = None) -> Path | None:
-    """Locate .crb/rules.yaml walking up from start or workspace root."""
-    root = (start or get_workspace_root()).resolve()
+    """Locate .crb/rules.yaml walking up from the repo under review only."""
+    if start is None:
+        return None
+    root = start.resolve()
+    workspace = get_workspace_root().resolve()
     for candidate in [root, *root.parents]:
         rules = repo_rules_path(candidate)
         if rules.is_file():
             return rules
-        if candidate == get_project_root():
+        if candidate == workspace:
             break
-    project_rules = repo_rules_path(get_project_root())
-    return project_rules if project_rules.is_file() else None
+    return None

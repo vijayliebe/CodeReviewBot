@@ -15,7 +15,7 @@ CodeReviewBot is **generic**: each user or team defines their own workspace for 
 Per-repo rules (also local, created by `init`):
 
 ```
-<repo>/.crb/rules.yaml   # e.g. codereviewbot/.crb/rules.yaml
+<repo>/.crb/rules.yaml   # e.g. benchmark_repos/django_app/.crb/rules.yaml
 ```
 
 **Exception:** `benchmark_repos/*/.crb/rules.yaml` stays in git — those are golden-set fixtures, not your personal workspace.

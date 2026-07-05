@@ -23,6 +23,7 @@ build/
 
 # Workspace config — local per user/project (see codereviewbot/examples/workspace/)
 /.crb-workspace/
+/.crb/
 codereviewbot/.crb/
 
 # Local-only — not published to GitHub (includes video script, course notes)

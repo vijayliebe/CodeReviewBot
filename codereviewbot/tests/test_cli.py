@@ -27,6 +27,26 @@ def test_cli_help(runner):
     assert "benchmark" in result.output
 
 
+def test_cli_init_requires_path(runner):
+    result = runner.invoke(cli, ["init"])
+    assert result.exit_code != 0
+    assert "--path" in result.output or "required" in result.output.lower()
+
+
+def test_cli_init_rejects_workspace_root(runner):
+    result = runner.invoke(cli, ["init", "--path", str(WORKSPACE)])
+    assert result.exit_code != 0
+    assert "refusing" in result.output.lower()
+
+
+def test_cli_init_rejects_codereviewbot_package(runner, monkeypatch):
+    from src.utils.paths import get_project_root
+
+    result = runner.invoke(cli, ["init", "--path", str(get_project_root())])
+    assert result.exit_code != 0
+    assert "refusing" in result.output.lower()
+
+
 def test_cli_init_on_django_app(runner):
     """`codereviewbot init --path <repo>` should profile and generate rules.yaml."""
     repo = WORKSPACE / "benchmark_repos" / "django_app"

@@ -8,7 +8,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from src.utils.paths import get_project_root, get_workspace_root, repo_config_dir, repo_rules_path, shared_rules_path, workspace_config_path, default_product_name
+from src.utils.paths import (
+    get_project_root,
+    get_workspace_root,
+    is_reserved_init_root,
+    repo_config_dir,
+    repo_rules_path,
+    shared_rules_path,
+    workspace_config_path,
+    default_product_name,
+)
 from src.platforms.registry import profile_repo, build_review_preamble
 from src.utils.token_budget import (
     compact_diff,
@@ -75,10 +84,26 @@ def cli():
 
 
 @cli.command()
-@click.option("--path", "repo_path", default=None, help="Repository root to profile (default: workspace root).")
+@click.option(
+    "--path",
+    "repo_path",
+    required=True,
+    help="Repository root to profile (e.g. ../benchmark_repos/backend_service).",
+)
 def init(repo_path):
     """Analyze the repository stack and initialize a default rules configuration."""
-    root = Path(repo_path).resolve() if repo_path else PROJECT_ROOT
+    root = Path(repo_path).resolve()
+    if is_reserved_init_root(root):
+        click.echo(
+            click.style(
+                "Error: refusing to init workspace or codereviewbot package root.\n"
+                "Point --path at the repo under review, e.g.:\n"
+                "  codereviewbot init --path ../benchmark_repos/backend_service",
+                fg="red",
+            ),
+            err=True,
+        )
+        sys.exit(1)
     click.echo(f"🔍 Profiling repository at {root}...")
 
     profile = profile_repo(root)
@@ -95,11 +120,7 @@ def init(repo_path):
 
     from src.memory.rule_harvester import generate_default_rules_file
 
-    rules_dir = repo_config_dir(root)
-    if root == PROJECT_ROOT or str(root).endswith("codereviewbot"):
-        rules_dir = repo_config_dir(PROJECT_ROOT)
-
-    file_path = generate_default_rules_file(data, rules_dir)
+    file_path = generate_default_rules_file(data, repo_config_dir(root))
     click.echo(click.style(f"✔ Initialized {file_path} ({len(data.get('platform_adapters', []))} adapters)", fg="green"))
 
 

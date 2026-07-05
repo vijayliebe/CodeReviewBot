@@ -1,30 +1,38 @@
-# backend_service/.crb/rules.yaml
-# Custom business and architectural rules for the backend service
+# CodeReviewBot Repository Rules Configuration
+# Customize this file to fit your team's unwritten conventions.
 
 project:
-  name: "backend-service"
-  type: "microservice"
-
-domain_rules:
-  - id: no-float-for-money
-    description: "Never use float for monetary calculations in billing files. Use Decimal instead."
-    pattern: "float\\("
-    files: ["**/billing.py", "**/payment*.py"]
-    severity: "critical"
-    suggestion: "Use `from decimal import Decimal` instead of float()"
-
-architecture_rules:
-  - id: no-direct-db-in-controllers
-    description: "Controllers must not import models directly. Use the service layer."
-    pattern: "from.*models import|import.*models"
-    files: ["**/controllers/*.py", "**/controller.py"]
-    severity: "medium"
-    suggestion: "Access database models through service classes in services/ instead of importing them directly."
-
-integration_rules:
-  - id: redis-key-prefix
-    description: "All Redis keys in the backend service must start with 'backend:'"
-    pattern: "\\b\\w+\\.(set|get|delete|del)\\(\\s*f?[\"'](?!backend:)"
-    files: ["**/*.py"]
-    severity: "high"
-    suggestion: "Add the 'backend:' prefix to your cache key. Example: redis.set('backend:session_id', val)"
+  name: backend_service
+  type: monolith
+rules:
+- id: no-float-for-money
+  description: Never use float for monetary calculations. Always use Decimal.
+  pattern: float\(
+  files:
+  - '**/payment*.py'
+  - '**/billing*.py'
+  - '**/invoice*.py'
+  - '**/finance*.py'
+  severity: critical
+  suggestion: Use `from decimal import Decimal` instead of float()
+- id: bare-except
+  description: 'Do not use bare except: clauses, always catch explicit Exceptions'
+  pattern: 'except\s*:'
+  files:
+  - '**/*.py'
+  severity: medium
+  suggestion: Use `except Exception as e:` or catch specific error class
+- id: no-console-log
+  description: Do not leave console.log() statements in production files.
+  pattern: console\.log\(
+  files:
+  - '**/*.js'
+  - '**/*.ts'
+  - '**/*.jsx'
+  - '**/*.tsx'
+  exclude_files:
+  - '**/*.test.*'
+  - '**/*.spec.*'
+  - '**/tests/**'
+  severity: medium
+  suggestion: Use a logger utility or remove console.log()

@@ -2,7 +2,7 @@
 # Customize this file to fit your team's unwritten conventions.
 
 project:
-  name: ai_agent_repo
+  name: ai-agent-benchmark
   type: ai-agent
 rules:
 - id: no-float-for-money
