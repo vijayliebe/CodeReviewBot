@@ -215,6 +215,14 @@ Each benchmark repo may also have its own `<repo>/.crb/rules.yaml` for stack-spe
    # and GITHUB_TOKEN (optional, for remote PRs)
    ```
 
+5. **Run the full demo** (from this directory)
+   ```bash
+   python ../demo_all_use_cases.py --fresh          # all 11 use-cases, clean workspace
+   python ../demo_all_use_cases.py --list           # list use-case IDs
+   python ../demo_all_use_cases.py --with-llm       # include live Gemini review
+   ```
+   Writes `sample_review_output.txt` and `sample_review_report.md` at the monorepo root. See [`../demo_all_use_cases.py`](../demo_all_use_cases.py).
+
 ---
 
 ## 💻 CLI Usage

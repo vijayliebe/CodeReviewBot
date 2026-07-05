@@ -9,6 +9,7 @@ Multi-agent PR review and security audit agent built with **Google ADK** and **M
 | [`codereviewbot/`](codereviewbot/) | Main project — agents, MCP servers, CLI, tests, skills, Docker |
 | [`benchmark_repos/`](benchmark_repos/) | Golden-set benchmark repos + ground-truth labels |
 | [`codereviewbot/examples/workspace/`](codereviewbot/examples/workspace/) | **Templates** for local workspace config (copy to gitignored `.crb-workspace/`) |
+| [`demo_all_use_cases.py`](demo_all_use_cases.py) | End-to-end CLI demo (all 11 use-cases) |
 
 Workspace config (`workspace.yaml`, `shared_rules.yaml`) is **local per user/project** — not in git. See [Workspace setup](codereviewbot/examples/workspace/README.md).
 
@@ -20,9 +21,24 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 cp .env.example .env   # add GOOGLE_API_KEY
+```
 
-# End-to-end setup (from monorepo root, after pip install -e ".[dev]")
+### Full terminal demo (recommended)
 
+From `codereviewbot/`, run the automated walkthrough of all 11 use-cases. It sets up `.crb-workspace/`, indexes repos, runs the benchmark, and writes sample artifacts to the repo root:
+
+```bash
+python ../demo_all_use_cases.py --fresh          # clean workspace + full demo (no LLM)
+python ../demo_all_use_cases.py --list           # show all use-case IDs
+python ../demo_all_use_cases.py --only workspace # run one use-case
+python ../demo_all_use_cases.py --with-llm       # include live Gemini review (needs API key)
+```
+
+Outputs at repo root: `sample_review_output.txt`, `sample_review_report.md`.
+
+### Manual CLI (step by step)
+
+```bash
 # 1. Workspace — local config (gitignored)
 codereviewbot workspace init --product "my-product"
 codereviewbot workspace register --id backend --path benchmark_repos/backend_service --kind backend
@@ -44,9 +60,6 @@ codereviewbot benchmark
 
 # Run tests
 PYTHONPATH=. pytest -q
-
-# Full terminal demo (writes sample_review_output.txt + sample_review_report.md at repo root):
-# python ../.docs/kaggle_submission/demo_all_use_cases.py --fresh
 ```
 
 Full documentation: [`codereviewbot/README.md`](codereviewbot/README.md)
